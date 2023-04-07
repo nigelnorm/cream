@@ -20,22 +20,22 @@ def main():
             num = int(input("Input a number that marks your choice: "))
             if(num == 1):
                 os.system('cls')
-                createAccount()
+                createAccount("c")
             elif(num == 2):
                 customer()
             elif(num==3):
                 admin()
-mycursor.execute("CREATE TABLE Admin (adminID int UNSIGNED PRIMARY KEY, pin int UNSIGNED NOT NULL, name VARCHAR(50) NOT NULL")
-def createAccount():
-    name = input("Name: ")
-    pin = int(input("New Pin: "))
-    mycursor.execute("INSERT INTO Customer (pin, name, balance) VALUES(%s,%s,%s)",(pin,name,1002))
-    db.commit()
-    mycursor.execute("select accountID from Customer ORDER BY accountID DESC LIMIT 1;")
-    for x in mycursor:
-        print("Hello " + name + " your \"randomly\" generated account ID is:  " + str(x))
-    print("\nStarting Balance: $100\n")
-    print("Would you like to perform operations using this account(Y/N)")
+def createAccount(type):
+    if(type == "c"):
+        name = input("Name: ")
+        pin = int(input("New Pin: "))
+        mycursor.execute("INSERT INTO Customer (pin, name, balance) VALUES(%s,%s,%s)",(pin,name,1002))
+        db.commit()
+        mycursor.execute("select accountID from Customer ORDER BY accountID DESC LIMIT 1;")
+        for x in mycursor:
+            print("Hello " + name + " your \"randomly\" generated account ID is:  " + str(x))
+        print("\nStarting Balance: $100\n")
+        print("Would you like to perform operations using this account(Y/N)")
 
 # THIS IS FOR CUSTOMER STUFF
 def customer():
@@ -64,7 +64,7 @@ def customer():
         db.commit()
 
 def login(type):
-    if(type.equals("c")):
+    if(type =="c"):
         while(True):
             os.system('cls')
             print("Login to your customer account.")
@@ -90,7 +90,7 @@ def login(type):
             accountID = int(input("Admin ID: "))
             pin = int(input("PIN: "))
             mycursor = db.cursor()
-            mycursor.execute("SELECT accountID FROM Admin WHERE adminID = %s AND pin = %s", (accountID, pin))
+            mycursor.execute("SELECT adminID FROM Admin WHERE adminID = %s AND pin = %s", (accountID, pin))
             account = mycursor.fetchall()
             for row in account:
                 if row[0] == None:
@@ -140,7 +140,7 @@ def transfer(acc):
         otherBal = row[0]
     mycursor.execute("UPDATE Customer SET balance = %s WHERE accountId = %s", ((otherBal+transfer), otherAcc))
 # Deletion of account for Customers
-def custDelete(acc):
+
 
     return
 # --------------------------
@@ -148,33 +148,63 @@ def custDelete(acc):
 # --------------------------
 def admin():
     acc = login("a")
-    os.system('cls')
-    print("What would you like to do?\n")
-    print("1. Create an Account")
-    print("2. Delete an Account")
-    print("3. Change a Customer's Account Values")
-    print("4. Change Your Account Values\n")
-    print("5. Log Out")
-    choice = int(input("Enter in your choice number: "))
-
-    if (choice == 1):
-        createAccount("a", acc)
-    elif (choice == 2):
-        deleteAccount("a",acc)
-    elif (choice == 3):
-        changeCustInfo()
-    elif(choice == 4):
-        changeOwnInfo()
-    elif(choice== 5):
-        return
+    while(True):
+        os.system('cls')
+        print("What would you like to do?\n")
+        print("1. Create an Account")
+        print("2. Delete an Account")
+        print("3. Change a Customer's Account Values")
+        print("4. Change Your Account Values\n")
+        print("5. Log Out")
+        choice = int(input("Enter in your choice number: "))
+        os.system('cls')
+        if (choice == 1):
+            createAccount("a", acc)
+        elif (choice == 2):
+            deleteAccount("", acc)
+        elif (choice == 3):
+            print("Changing Customer Info \n")
+            changeCustInfo(int(input("Input their customerID: ")))
+        elif(choice == 4):
+            changeOwnInfo()
+        elif(choice== 5):
+            break
     
 
-def deleteAccount():
+def deleteAccount(type, acc):
+    if(type == "c"):
+        sure = input("Are you sure (Y/N)")
+        if(sure == 'Y'):
+            mycursor.execute("DELETE FROM Customer WHERE accountID = %s" ,[acc])
+            db.commit()
+            print("Your account has been deleted")
+            return
+    else:
+        print("Admin Deletion \n")
+        print("1. Delete Customer Account")
+        print("2. Delete Your Own Account")
+        print("3. Back")
+        
+        choice = int(input("Enter in your choice number: "))
+        if (choice == 1):
+            custNum = int(input("Choose Customer Account Number: "))
+            deleteAccount("c", custNum)
+        elif (choice == 2):
+            sure = input("Are you sure (Y/N)")
+            if(sure == 'Y'):
+                mycursor.execute("DELETE FROM Admin WHERE adminId = %s", [acc])
+                db.commit()
+                print("Your account has been deleted")
+            else:
+                deleteAccount(type,acc)
+        elif (choice == 3):
+            return
     return
+
 def changeCustInfo(cust):
     return
 def changeOwnInfo(acc):
-    return\
+    return
     
 
 
