@@ -22,7 +22,7 @@ def main():
                 os.system('cls')
                 createAccount("c")
             elif(num == 2):
-                customer()
+                customer("c",0)
             elif(num==3):
                 admin()
 def createAccount(type):
@@ -33,13 +33,25 @@ def createAccount(type):
         db.commit()
         mycursor.execute("select accountID from Customer ORDER BY accountID DESC LIMIT 1;")
         for x in mycursor:
-            print("Hello " + name + " your \"randomly\" generated account ID is:  " + str(x))
+            print("Hello " + name + " your \"randomly\" generated account ID is:  " + str(x[0]))
         print("\nStarting Balance: $100\n")
         print("Would you like to perform operations using this account(Y/N)")
+    if(type == "a"):
+        name = input("Name: ")
+        ids = input("Unique Admin ID: ")
+        pin = int(input("New Pin: "))
+        mycursor.execute("INSERT INTO Admin (pin, name, adminID) VALUES(%s,%s,%s)",(pin,name,ids))
+        db.commit()
+        mycursor.execute("select adminID from Customer ORDER BY adminID DESC LIMIT 1;")
+        for x in mycursor:
+            print("Hello " + name + " your adminID is:  " + str(x[0]))
+        print("Would you like to perform operations using this account(Y/N)")
+        
 
 # THIS IS FOR CUSTOMER STUFF
-def customer():
-    accNum = login("c")
+def customer(type, accNum):
+    if(type == "c"):
+        accNum = login("c")
     while(True):
         os.system('cls')
         print("What would you like to do?")
@@ -47,7 +59,8 @@ def customer():
         print("2. Deposit Money")
         print("3. Transfer Money")
         print("4. View Current Balance")
-        print("5. Log Out")
+        print("5. Modify Account")
+        print("6. Log Out")
         choice = int(input("Pick an number to continue..."))
         os.system('cls')
         if(choice == 1):
@@ -60,6 +73,8 @@ def customer():
             view(accNum)
             hello = input("Enter something to continue..")
         elif(choice == 5):
+            changeInfo("c", accNum)
+        elif(choice == 6):
             break
         db.commit()
 
@@ -159,14 +174,14 @@ def admin():
         choice = int(input("Enter in your choice number: "))
         os.system('cls')
         if (choice == 1):
-            createAccount("a", acc)
+            createAccount("a")
         elif (choice == 2):
             deleteAccount("", acc)
         elif (choice == 3):
             print("Changing Customer Info \n")
-            changeCustInfo(int(input("Input their customerID: ")))
+            changeInfo("c",int(input("Input their customerID: ")))
         elif(choice == 4):
-            changeOwnInfo()
+            changeInfo("a", acc)
         elif(choice== 5):
             break
     
@@ -201,10 +216,35 @@ def deleteAccount(type, acc):
             return
     return
 
-def changeCustInfo(cust):
-    return
-def changeOwnInfo(acc):
-    return
+def changeInfo(type, accNum):
+    while(True):
+        os.system('cls')
+        if(type == "c"):
+            print("Customer Profile Change")
+        else:
+            print("Admin Profile Change")
+        print("1. Edit Name")
+        print("2. Edit PIN")
+        print("3. Back")
+        choice = int(input("Please pick a number: "))
+
+        if choice == 1:
+            custName = input("/n New Name: ")
+            if(type == "c"):
+                mycursor.execute("UPDATE Admin SET name = %s WHERE adminID = %s", (custName, accNum))
+            else:
+                mycursor.execute("UPDATE Admin SET name = %s WHERE adminID = %s", (custName, accNum))
+            
+        elif choice == 2:
+            PIN = int(input("New Pin:"))
+            if(type == "c"):
+                mycursor.execute("UPDATE Admin SET pin = %s WHERE adminID = %s", (PIN, accNum))
+            else:
+                mycursor.execute("UPDATE Admin SET pin = %s WHERE adminID = %s", (PIN, accNum))
+        elif choice == 3:
+            return
+        db.commit()
+
     
 
 
